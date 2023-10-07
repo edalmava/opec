@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Consultar Listas de Elegibles</title>
+
+    <style media="screen">
+      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+      #message { background: white; max-width: 80%; margin: 20px auto 16px; padding: 32px 24px; border-radius: 3px; }
+      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
+      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
+      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
+      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+      #load { color: rgba(0,0,0,0.6); text-align: center; font-size: 13px; max-width: 80%; margin: 10px auto 16px; }
+      #loadAudienciasOpecDetails { background: white; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); max-width: 80%; margin: 20px auto 16px; padding: 32px 24px; }
+      @media (max-width: 600px) {
+        body, #message, #loadAudienciasOpecDetails { margin-top: 0; background: white; box-shadow: none; }
+        body { border-top: 16px solid #ffa100; }
+        label { display: none; }
+      } 
+      caption {font-weight: bolder;}
+      table { border-collapse: collapse; }
+      th, td { padding: 8px; text-align: left; border: 1px solid #ddd; }
+      tbody tr:hover { background-color: #f5f5f5; }
+      thead th { background-color: #039be5; color: white; }   
+      .layout { display: flex; gap: 16px; flex-wrap: wrap; flex: 1; }      
+      ::backdrop { backdrop-filter: blur(3px); }  
+    </style>
+  </head>
+  <body>    
+    <div id="message">
+      <h2>¡Bienvenido!</h2>
+      <h1>Listas de Elegibles</h1>
+      
+      <form id="lista" class="layout">
+        <label for="nivel">Nivel</label>
+        <select id="nivel" name="nivel" required>
+          <option value="">Selecciona un Nivel</option>
+          <option value="6">Directivo Docente</option>
+          <option value="7">Docente de Aula</option>
+          <option value="11">Docente Orientador</option>
+        </select>
+        <label for="departamento">Departamento</label>
+        <select id="departamento" name="departamento" required>
+          <option value="">Selecciona un Departamento</option>          
+        </select>
+        <label for="cargo">Área</label>
+        <select id="cargo" name="cargo">
+          <option value="">Selecciona un Cargo</option>          
+        </select>        
+        <button id="consultar" class="btn">Consultar</button>
+      </form>      
+    </div>
+    <div id="loadAudienciasOpecDetails">
+      <details>
+        <summary>Audiencias y OPEC actualizadas</summary>
+        <div id="loadAudienciasOpec"></div>
+      </details>      
+    </div>
+    <div id="load"></div>   
+
+    <template id="opec">
+      <tr id="">
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+
+    <dialog id="listado">
+      <menu>
+        <button id="cancel">Cerrar</button>        
+      </menu>
+      <section id="tabla"></section>
+    </dialog>    
+    
+    <script>      
+      const departamentos = [
+        { "id": 1, "nombre": "Amazonas" },
+        { "id": 2, "nombre": "Antioquia" },
+        { "id": 3, "nombre": "Arauca" },
+        { "id": 5, "nombre": "Atlántico" },
+        { "id": 6, "nombre": "Bogotá D.C." },
+        { "id": 7, "nombre": "Bolívar" },
+        { "id": 8, "nombre": "Boyacá" },
+        { "id": 9, "nombre": "Caldas" },
+        { "id": 10, "nombre": "Caquetá" },
+        { "id": 11, "nombre": "Casanare" },
+        { "id": 12, "nombre": "Cauca" },
+        { "id": 13, "nombre": "Cesar" },
+        { "id": 14, "nombre": "Chocó" },
+        { "id": 15, "nombre": "Córdoba" },
+        { "id": 16, "nombre": "Cundinamarca" },
+        { "id": 17, "nombre": "Guainía" },
+        { "id": 18, "nombre": "Guaviare" },
+        { "id": 19, "nombre": "Huila" },
+        { "id": 20, "nombre": "La Guajira" },
+        { "id": 21, "nombre": "Magdalena" },
+        { "id": 22, "nombre": "Meta" },
+        { "id": 23, "nombre": "Nariño" },
+        { "id": 24, "nombre": "Norte de Santander" },
+        { "id": 25, "nombre": "Quindío" },
+        { "id": 26, "nombre": "Risaralda" },
+        { "id": 27, "nombre": "Santander" },
+        { "id": 28, "nombre": "Sucre" },
+        { "id": 29, "nombre": "Tolima" },
+        { "id": 30, "nombre": "Valle del Cauca" },
+        { "id": 32, "nombre": "Vichada" },
+        { "id": 33, "nombre": "Putumayo" }
+      ]
+
+      const directivo = [ "COORDINADOR", "RECTOR", "DIRECTOR RURAL" ]
+
+      const docenteAula = [      
+        "DOCENTE DE PREESCOLAR",
+        "DOCENTE DE PRIMARIA",
+        "CIENCIAS ECONOMICAS Y POLITICAS",
+        "CIENCIAS NATURALES FISICA",
+        "CIENCIAS NATURALES QUIMICA",
+        "CIENCIAS NATURALES Y EDUCACION AMBIENTAL",
+        "CIENCIAS SOCIALES, HISTORIA, GEOGRAFÍA, CONSTITUCIÓN POLÍTICA Y DEMOCRACIA.",
+        "EDUCACION ARTISTICA - ARTES PLASTICAS",
+        "EDUCACION ARTISTICA - DANZAS",
+        "EDUCACION ETICA Y VALORES HUMANOS",
+        "EDUCACION FISICA, RECREACION Y DEPORTE",
+        "EDUCACION RELIGIOSA",
+        "FILOSOFIA",
+        "HUMANIDADES Y LENGUA CASTELLANA",
+        "IDIOMA EXTRANJERO INGLES",
+        "MATEMATICAS",
+        "TECNOLOGIA E INFORMATICA",
+        "EDUCACION ARTISTICA - ARTES ESCENICAS",
+        "EDUCACION ARTISTICA - MUSICA"
+      ]
+
+      const options = (array, elemento) => {
+        array.forEach(opt => {
+          const option = document.createElement('option')
+          option.setAttribute('value', opt)
+          option.textContent = opt.slice(0, 44)
+          elemento.appendChild(option)
+        })
+      }
+
+      const cargarDepartamentos = () => {
+        departamentos.forEach(departamento =>   {          
+          const option = document.createElement('option')
+          option.setAttribute('value', departamento.id)
+          option.textContent = departamento.nombre
+          depar.appendChild(option)
+        }) 
+      }
+      
+      const nivel = document.getElementById('nivel')
+      const cargo = document.getElementById('cargo')
+      const depar = document.getElementById('departamento')
+      const load = document.getElementById('load')
+      const form = document.getElementById('lista')
+      const cancelButton = document.getElementById("cancel")
+      const dialog = document.getElementById("listado")
+      const dialogTable = document.getElementById("tabla")
+      const loadAudienciasOpec = document.getElementById('loadAudienciasOpec')
+
+      let deparOpec = {}
+      
+      nivel.addEventListener('change', ev => {        
+        cargo.innerHTML = '<option value="">Selecciona un Cargo</option>'        
+        if (ev.target.value === '6') {          
+          options(directivo, cargo)  
+        } else if (ev.target.value === '7') {          
+          options(docenteAula, cargo)  
+        } else {          
+          options(['DOCENTE ORIENTADOR'], cargo)
+        }
+      })   
+
+      async function cargarListaDet(id) {
+        const button = document.getElementById(id)
+        button.setAttribute('disabled', 'disabled')
+
+        dialogTable.innerHTML = 'Cargando Listado...'
+
+        dialog.showModal()
+        
+        const listaDet = await getURL('https://listadet.edalmava.workers.dev/', { id:  id })
+
+        dialogTable.innerHTML = ''
+
+        listaDet.forEach((elem, index) => {
+          dialogTable.insertAdjacentHTML('beforeend', `<p>${index + 1} - ${elem.nombresElegible} ${elem.apellidosElegible} - ${elem.tipoFirmezaElegible || ''}</p>`)
+        })
+
+        button.removeAttribute('disabled')
+      }
+
+      cancelButton.addEventListener("click", function () {
+        dialog.close();
+      });
+      
+      async function getURL(url, bodyObj) {
+        const request = await fetch(`${url}`, {
+          headers: {
+            "Content-Type": "application/json"
+          },
+          method: "POST",
+          body: JSON.stringify(bodyObj)
+        });
+
+        const response = await request.json()
+
+        return response
+      }
+
+      function cargarTabla(opec) {        
+        const tabla = document.createElement('table')
+        const caption = tabla.createCaption()
+        caption.textContent = `Cantidad OPEC encontradas: ${opec.length}`
+        
+        const thead = tabla.createTHead()
+        const trThead = thead.insertRow()        
+        const cell1 = document.createElement('th')
+        cell1.textContent = 'OPEC'
+        trThead.appendChild(cell1)        
+        const cell2 = document.createElement('th')
+        cell2.textContent = 'ÁREA'
+        trThead.appendChild(cell2)        
+        const cell3 = document.createElement('th')
+        cell3.textContent = 'ENTIDAD'
+        trThead.appendChild(cell3)
+        const cell4 = document.createElement('th')
+        cell4.textContent = 'NIVEL'
+        trThead.appendChild(cell4)
+        const cell5 = document.createElement('th')
+        cell5.textContent = 'VER'
+        trThead.appendChild(cell5)
+        
+        const tb = tabla.createTBody()
+
+        tb.innerHTML = ''
+
+        const opecItem = document.querySelector('#opec')
+        const td = opecItem.content.querySelectorAll('td')
+        const tr = opecItem.content.querySelector('tr')
+
+        opec.forEach(empleo => {
+          tr.id = empleo.id
+          td[0].textContent = empleo.id
+          td[1].textContent = empleo.empleo.denominacion.nombre.slice(0, 50)
+          td[2].textContent = empleo.empleo.convocatoria.nombre
+          td[3].textContent = empleo.empleo.gradoNivel.nivelNombre
+          td[4].innerHTML = `<button style="background-color: #039be5; border: 1px solid #039be5" onclick="cargarLista(${empleo.id})">&#128270;</button>`
+          
+          const clone = document.importNode(opecItem.content, true);
+          tb.appendChild(clone)          
+        })
+
+        load.appendChild(tabla)
+      }
+
+      function replaceTildes (departamento) {
+        let dep = departamento.replace('Í', 'I')
+        dep = dep.replace('Á', 'A')
+        dep = dep.replace('É', 'E')
+        dep = dep.replace('Ó', 'O')
+        dep = dep.replace('Ú', 'U')
+        dep = dep.replace(' D.C.', '')
+
+        return dep
+      }
+
+      function cargarAudienciasDepOpec() {        
+          loadAudienciasOpec.innerHTML = ''         
+          
+          if(deparOpec.length) {
+            const nombreDepartamento = document.querySelector(`#departamento option[value='${depar.value}']`).textContent
+            const dOa = []
+            const deparOpecAudiencia = deparOpec.forEach(depOpecAud => {            
+              if (depOpecAud.textContent.includes(replaceTildes(nombreDepartamento.toUpperCase()))) {              
+                dOa.push(depOpecAud)
+              }
+            })
+
+            loadAudienciasOpec.appendChild(dOa[0])
+          } else {
+            loadAudienciasOpec.innerHTML = 'No se han cargado datos...'
+          }          
+      }
+
+      async function cargarAudienciasOpec() {
+        try {        
+          const request = await fetch(`https://audiencias-opec.edalmava.workers.dev/`, {
+            headers: {
+              "Content-Type": "text/html;charset=UTF-8"
+            },
+            method: "GET"
+          });
+          const response = await request.text()
+          
+          parser = new DOMParser();
+          doc = parser.parseFromString(response, "text/html"); 
+          deparOpec = doc.querySelectorAll('div.accordion-group.gray')        
+        } catch(e) {
+          console.error(e)
+        }
+      }
+         
+      async function cargarOpec() { 
+        try {             
+          load.innerHTML = 'Cargando Datos...';
+
+          const opec = await getURL(`https://opec.edalmava.workers.dev/`, 
+            { nivel: nivel.value, departamento: depar.value, cargo: cargo.value })
+                    
+          if (opec) {            
+            load.innerHTML = '';
+            
+            if (opec.length !== 0) {              
+              cargarTabla(opec)              
+            } else {              
+              load.innerHTML = 'No hay OPEC correspondientes a los datos suministrados';
+            }
+          }        
+        } catch(e) {
+          console.error(e)
+        }
+      }
+
+      async function cargarLista(codigoEmpleo) {        
+        try {          
+          const parent = document.getElementById(codigoEmpleo)
+          
+          parent.lastElementChild.firstChild.setAttribute('disabled', 'disabled')          
+
+          const lista = await getURL('https://lista.edalmava.workers.dev/', {codigoEmpleo: codigoEmpleo, codigoConvocatoria: "secretaría"})
+          
+          if (lista.length) {
+            parent.insertAdjacentHTML('afterend', `
+            <tr style='background-color: #02AE03; color: white;'><th>Nro. Resolución</th><th>Nro. Lista</th><th>Fecha Publicación</th><th>Estado</th><th>VER</th></tr>
+            <tr><td><a href="${lista[0].urlActoAdministrativo}" target="_blank">${lista[0].numeroActo}</a></td><td>${lista[0].lista.id}</td><td>${lista[0].fechaPublicacion}</td><td>${lista[0].estadoPublicado?'ACTIVA':'INACTIVA'}</td><td><button id="${lista[0].lista.publicaElegible.id}" style="background-color: #02AE03; border: 1px solid #02AE03" onclick="cargarListaDet(${lista[0].lista.publicaElegible.id})">&#128270;</button></td></tr>`)
+          }  else {
+            parent.insertAdjacentHTML('afterend', '<tr><td colspan="5">No hay lista disponible por el momento</td></tr>')
+          }            
+        } catch(e) {
+          console.error(e)          
+        }       
+      }
+      
+      form.addEventListener('submit', evt => {
+        evt.preventDefault()
+        cargarOpec() 
+        cargarAudienciasDepOpec()       
+      })
+
+      document.addEventListener('DOMContentLoaded', function() {               
+        cargarDepartamentos()
+        cargarAudienciasOpec()
+      })
+    </script>
+  </body>
+</html>
