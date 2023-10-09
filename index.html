@@ -179,6 +179,7 @@
       const loadAudienciasOpec = document.getElementById('loadAudienciasOpec')
 
       let deparOpec = {}
+      let opecEncontradas = []
       
       nivel.addEventListener('change', ev => {        
         cargo.innerHTML = '<option value="">Selecciona un Cargo</option>'        
@@ -259,8 +260,11 @@
         const td = opecItem.content.querySelectorAll('td')
         const tr = opecItem.content.querySelector('tr')
 
+        opecEncontradas = []
+
         opec.forEach(empleo => {
           tr.id = empleo.id
+          opecEncontradas.push(empleo.id)
           td[0].textContent = empleo.id
           td[1].textContent = empleo.empleo.denominacion.nombre.slice(0, 50)
           td[2].textContent = empleo.empleo.convocatoria.nombre
@@ -296,8 +300,12 @@
             
             if (deparOpecAudiencia.length) {
               const i = depar.value === '27'?1:0
-              const prueba = deparOpecAudiencia[i].cloneNode(true)            
-              loadAudienciasOpec.append(prueba.lastChild)
+              const prueba = deparOpecAudiencia[i].cloneNode(true)  
+              const cantidadSecretaria = prueba.lastChild.querySelectorAll('div.accordion-inner div.accordion-group.blue') 
+              const busquedaOPEC = [...cantidadSecretaria].filter(ele => opecEncontradas.some(e => ele.textContent.includes(e)))
+              //console.log(busquedaOPEC.length)   
+              //loadAudienciasOpec.append(prueba.lastChild)
+              busquedaOPEC.forEach(o => loadAudienciasOpec.append(o))
             }                                           
           } else {
             loadAudienciasOpec.innerHTML = 'No se han cargado datos...'
@@ -337,6 +345,8 @@
             } else {              
               load.innerHTML = 'No hay OPEC correspondientes a los datos suministrados';
             }
+
+            cargarAudienciasDepOpec()       
           }        
         } catch(e) {
           console.error(e)
@@ -366,7 +376,7 @@
       form.addEventListener('submit', evt => {
         evt.preventDefault()
         cargarOpec() 
-        cargarAudienciasDepOpec()       
+        //cargarAudienciasDepOpec()       
       })
 
       document.addEventListener('DOMContentLoaded', function() {               
