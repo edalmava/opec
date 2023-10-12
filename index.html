@@ -81,7 +81,8 @@
       </menu>
       <table>
         <thead>
-          <th>PUESTO</th>
+          <th>PUESTO</th> 
+          <th>C.C.</th>         
           <th>NOMBRES Y APELLIDOS</th>
           <th>PUNTAJE</th>
           <th>FECHA FIRMEZA</th>
@@ -205,7 +206,7 @@
         dialogTable.innerHTML = ''
 
         listaDet.forEach((elem, index) => {
-          dialogTable.insertAdjacentHTML('beforeend', `<tr><td>${elem.puesto}</td><td>${elem.nombresElegible} ${elem.apellidosElegible}</td><td>${elem.puntaje}</td><td>${elem.fechaFirmeza || ''}</td><td>${elem.tipoFirmezaElegible || ''}</td></tr>`)
+          dialogTable.insertAdjacentHTML('beforeend', `<tr><td>${elem.puesto}</td><td>${elem.identificacion}</td><td>${elem.nombresElegible} ${elem.apellidosElegible}</td><td>${elem.puntaje}</td><td>${elem.fechaFirmeza || ''}</td><td>${elem.tipoFirmezaElegible || ''}</td></tr>`)
         })
 
         button.removeAttribute('disabled')
