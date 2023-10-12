@@ -34,9 +34,11 @@
     </style>
   </head>
   <body>    
-    <div id="message">
-      <h2>¡Bienvenido!</h2>
-      <h1>Listas de Elegibles</h1>
+    <section id="message">
+      <header>
+        <h2>¡Bienvenido!</h2>
+        <h1>Listas de Elegibles</h1>
+      </header>
       
       <form id="lista" class="layout">
         <label for="nivel">Nivel</label>
@@ -56,13 +58,13 @@
         </select>        
         <button id="consultar" class="btn">Consultar</button>
       </form>      
-    </div>
-    <div id="loadAudienciasOpecDetails">
+    </section>
+    <section id="loadAudienciasOpecDetails">
       <details>
         <summary>Audiencias y OPEC actualizadas</summary>
         <div id="loadAudienciasOpec"></div>
       </details>      
-    </div>
+    </section>
     <div id="load"></div>   
 
     <template id="opec">
