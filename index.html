@@ -8,15 +8,15 @@
     <style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
       #message { background: white; max-width: 80%; margin: 20px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+      h1 { font-size: 22px; font-weight:600; color: rgba(0,0,0,0.6); max-width: 80%; margin: 10px auto; padding: 10px 8px; }
       #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
       #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
       #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
       #load { color: rgba(0,0,0,0.6); text-align: center; font-size: 13px; max-width: 80%; margin: 10px auto 16px; }
       #loadAudienciasOpecDetails { background: white; border-radius: 3px; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); max-width: 80%; margin: 20px auto 16px; padding: 32px 24px; }
       @media (max-width: 600px) {
-        body, #message, #loadAudienciasOpecDetails { margin-top: 0; background: white; box-shadow: none; }
+        body, #message, #loadAudienciasOpecDetails { margin-top: 0; margin-bottom: 6px; box-shadow: none; }
+        #message, #loadAudienciasOpecDetails { padding: 16px 12px; }
         body { border-top: 16px solid #ffa100; }
         label { display: none; }
       } 
@@ -34,10 +34,10 @@
     </style>
   </head>
   <body>    
-    <div id="message">
-      <h2>¡Bienvenido!</h2>
+    <header>      
       <h1>Listas de Elegibles</h1>
-      
+    </header>
+    <section id="message">      
       <form id="lista" class="layout">
         <label for="nivel">Nivel</label>
         <select id="nivel" name="nivel" required>
@@ -56,14 +56,14 @@
         </select>        
         <button id="consultar" class="btn">Consultar</button>
       </form>      
-    </div>
-    <div id="loadAudienciasOpecDetails">
+    </section>
+    <section id="loadAudienciasOpecDetails">
       <details>
         <summary>Audiencias y OPEC actualizadas</summary>
         <div id="loadAudienciasOpec"></div>
       </details>      
-    </div>
-    <div id="load"></div>   
+    </section>
+    <section id="load"></section>   
 
     <template id="opec">
       <tr id="">
@@ -81,7 +81,8 @@
       </menu>
       <table>
         <thead>
-          <th>PUESTO</th>
+          <th>PUESTO</th> 
+          <th>C.C.</th>         
           <th>NOMBRES Y APELLIDOS</th>
           <th>PUNTAJE</th>
           <th>FECHA FIRMEZA</th>
@@ -205,7 +206,7 @@
         dialogTable.innerHTML = ''
 
         listaDet.forEach((elem, index) => {
-          dialogTable.insertAdjacentHTML('beforeend', `<tr><td>${elem.puesto}</td><td>${elem.nombresElegible} ${elem.apellidosElegible}</td><td>${elem.puntaje}</td><td>${elem.fechaFirmeza || ''}</td><td>${elem.tipoFirmezaElegible || ''}</td></tr>`)
+          dialogTable.insertAdjacentHTML('beforeend', `<tr><td>${elem.puesto}</td><td>${elem.identificacion}</td><td>${elem.nombresElegible} ${elem.apellidosElegible}</td><td>${elem.puntaje}</td><td>${elem.fechaFirmeza || ''}</td><td>${elem.tipoFirmezaElegible || ''}</td></tr>`)
         })
 
         button.removeAttribute('disabled')
