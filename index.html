@@ -152,12 +152,15 @@
       ]
 
       const options = (array, elemento) => {
+        const fragment = document.createDocumentFragment()
         array.forEach(opt => {
           const option = document.createElement('option')
           option.setAttribute('value', opt)
           option.textContent = opt.slice(0, 44)
-          elemento.appendChild(option)
+          fragment.appendChild(option);
+          //elemento.appendChild(option)
         })
+        elemento.appendChild(fragment)
       }
 
       const cargarDepartamentos = () => {
@@ -217,17 +220,32 @@
       });
       
       async function getURL(url, bodyObj) {
-        const request = await fetch(`${url}`, {
-          headers: {
-            "Content-Type": "application/json"
-          },
-          method: "POST",
-          body: JSON.stringify(bodyObj)
-        });
+        try {
+          if (!url || typeof url !== "string") {
+            throw new Error("La URL es inválida.")
+          }
 
-        const response = await request.json()
+          if (!bodyObj || typeof bodyObj !== "object") {
+            throw new Error("El cuerpo de la solicitud es inválido.");
+          }
 
-        return response
+          const request = await fetch(`${url}`, {
+            headers: {
+              "Content-Type": "application/json"
+            },
+            method: "POST",
+            body: JSON.stringify(bodyObj)
+          });
+
+          if (!request.ok) {
+            throw new Error(`HTTP error! Status: ${request.status}`)
+          }
+
+          const response = await request.json()
+          return response
+        } catch (error) {
+          console.error("Error en la solicitud:", error)
+        }
       }
 
       function cargarTabla(opec) {        
@@ -280,14 +298,18 @@
       }
 
       function replaceTildes (departamento) {
-        let dep = departamento.replace('Í', 'I')
-        dep = dep.replace('Á', 'A')
-        dep = dep.replace('É', 'E')
-        dep = dep.replace('Ó', 'O')
-        dep = dep.replace('Ú', 'U')
-        dep = dep.replace(' D.C.', '')
-
-        return dep
+        if (departamento && typeof departamento === 'string') {
+          return departamento
+            .replace(/[Áá]/g, 'A')
+            .replace(/[Éé]/g, 'E')
+            .replace(/[Íí]/g, 'I')
+            .replace(/[Óó]/g, 'O')
+            .replace(/[Úú]/g, 'U')
+            .replace(/ D\.C\./g, '')
+        } else {
+          console.error("El argumento proporcionado no es válido.")
+          return departamento
+        }
       }
 
       function cargarAudienciasDepOpec() {        
@@ -321,13 +343,18 @@
             },
             method: "GET"
           });
+
+          if (!request.ok) {
+            throw new Error(`HTTP error! Status: ${request.status}`);
+          }
+
           const response = await request.text()
           
-          parser = new DOMParser();
-          doc = parser.parseFromString(response, "text/html"); 
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(response, "text/html"); 
           deparOpec = doc.querySelectorAll('div.accordion-group.gray')        
         } catch(e) {
-          console.error(e)
+          console.error("Error en la solicitud:", error);
         }
       }
          
